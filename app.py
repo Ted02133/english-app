@@ -4,11 +4,12 @@ import random
 st.set_page_config(page_title="英文單字背誦", page_icon="🚀")
 st.title("🚀 單字背誦 App")
 
-# 1. 檔案上傳
-uploaded_file = st.file_uploader("請上傳你的單字 .txt 檔", type="txt")
+# 使用側邊欄 (Sidebar) 放置上傳功能，這樣主畫面會很乾淨
+with st.sidebar:
+    st.header("⚙️ 設定")
+    uploaded_file = st.file_uploader("上傳單字 .txt 檔", type="txt")
 
 if uploaded_file:
-    # 讀取單字並儲存在 session_state
     if "word_dict" not in st.session_state:
         content = uploaded_file.read().decode("utf-8")
         temp_dict = {}
@@ -23,7 +24,7 @@ if uploaded_file:
         random.shuffle(st.session_state.words)
         st.session_state.index = 0
         st.session_state.score = 0
-        st.session_state.submitted = False # 新增一個狀態記錄是否已提交
+        st.session_state.submitted = False
 
     if st.session_state.word_dict:
         idx = st.session_state.index
@@ -31,12 +32,14 @@ if uploaded_file:
 
         if idx < len(word_list):
             current_word = word_list[idx]
-            st.write(f"### 第 {idx+1} 題 / 共 {len(word_list)} 題")
-            st.info(f"👉 請輸入 **{current_word}** 的中文意思")
+            
+            # 用簡單的 text 代替大標題，省空間
+            st.write(f"**進度：{idx+1} / {len(word_list)}** | **得分：{st.session_state.score}**")
+            st.subheader(f"❓ 請輸入：{current_word}")
 
-            # 表單內只放輸入框和「送出」按鈕
-            with st.form(key=f"word_form_{idx}"):
-                user_ans = st.text_input("中文意思：")
+            with st.form(key=f"word_form_{idx}", clear_on_submit=True):
+                # 這裡增加 label_visibility，讓輸入框更明顯
+                user_ans = st.text_input("在這裡輸入中文意思", label_visibility="collapsed")
                 submit = st.form_submit_button("送出答案")
 
                 if submit:
@@ -46,18 +49,19 @@ if uploaded_file:
                         st.success("✅ 正確！")
                         st.session_state.score += 1
                     else:
-                        st.error(f"❌ 錯誤！正確答案是：{correct_ans}")
+                        st.error(f"❌ 錯誤！正確答案：{correct_ans}")
             
-            # 「下一題」按鈕放在 form 外面
             if st.session_state.submitted:
-                if st.button("下一題 ➡️"):
+                if st.button("下一題 ➡️", use_container_width=True):
                     st.session_state.index += 1
-                    st.session_state.submitted = False # 重置提交狀態
+                    st.session_state.submitted = False
                     st.rerun()
         else:
             st.balloons()
             st.write(f"🎉 測驗結束！總分：{st.session_state.score}/{len(word_list)}")
-            if st.button("重新開始"):
+            if st.button("重新開始", use_container_width=True):
                 for key in list(st.session_state.keys()):
                     del st.session_state[key]
                 st.rerun()
+else:
+    st.warning("👈 請點擊左上角箭頭，展開側邊欄上傳單字檔。")
