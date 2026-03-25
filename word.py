@@ -1,6 +1,7 @@
 import random
 import os
 
+
 # === 讀取單字檔 ===
 def load_words(filename):
     word_dict = {}
@@ -18,6 +19,7 @@ def load_words(filename):
         input("按 Enter 結束程式...")
         exit()
 
+
 # === 顯示測驗結果 ===
 def show_result(correct, wrong, wrong_list):
     print("\n=== 測驗結束 ===")
@@ -31,7 +33,9 @@ def show_result(correct, wrong, wrong_list):
     else:
         print("🎉 全部答對！太棒了！")
 
+
 # === 單字測驗 ===
+# === 單字測驗 (優化流暢版) ===
 def quiz(word_dict, mode="en_to_ch"):
     words = list(word_dict.keys())
     random.shuffle(words)
@@ -39,49 +43,48 @@ def quiz(word_dict, mode="en_to_ch"):
     wrong = 0
     wrong_list = []
 
-    print("\n=== 單字測驗開始！輸入 exit 離開 ===\n")
+    total_count = len(words)
 
-    for word in words:
+    for index, word in enumerate(words, start=1):
+        # 每一題開始前先清空畫面，讓畫面維持只有一題
+        os.system("cls" if os.name == "nt" else "clear")
+        print(f"=== 進度：{index}/{total_count} | 正確：{correct} | 錯誤：{wrong} ===")
+        print("\n輸入 exit 離開測驗\n")
+
         if mode == "en_to_ch":
-            ans = input(f"請輸入「{word}」的中文意思：")
+            ans = input(f"題目：{word} \n請輸入中文意思：")
             if ans.lower() == "exit":
                 break
             if ans == word_dict[word]:
-                print("✅ 正確！\n")
                 correct += 1
+                # 答對了直接進下一輪迴圈，畫面會被清空並顯示下一題
             else:
-                print(f"❌ 錯誤！正確答案是：{word_dict[word]}\n")
+                print(f"\n❌ 錯誤！正確答案是：{word_dict[word]}")
+                input("按 Enter 鍵繼續...")  # 答錯時停下來讓你看一下正確答案
                 wrong += 1
                 wrong_list.append((word, word_dict[word]))
 
         elif mode == "ch_to_en":
-            ans = input(f"請輸入「{word_dict[word]}」的英文單字：")
+            ans = input(f"題目：{word_dict[word]} \n請輸入英文單字：")
             if ans.lower() == "exit":
                 break
             if ans.lower() == word.lower():
-                print("✅ 正確！\n")
                 correct += 1
             else:
-                print(f"❌ 錯誤！正確答案是：{word}\n")
+                print(f"\n❌ 錯誤！正確答案是：{word}")
+                input("按 Enter 鍵繼續...")
                 wrong += 1
                 wrong_list.append((word, word_dict[word]))
 
+    os.system("cls" if os.name == "nt" else "clear")
     show_result(correct, wrong, wrong_list)
 
-    # 錯題複習
+    # 錯題複習邏輯保持不變...
     if wrong_list:
         again = input("\n要重練錯題嗎？(y/n)：")
         if again.lower() == "y":
-            os.system("cls" if os.name == "nt" else "clear")
             quiz(dict(wrong_list), mode)
 
-    # 再玩一輪
-    replay = input("\n要再玩一次整個測驗嗎？(y/n)：")
-    if replay.lower() == "y":
-        os.system("cls" if os.name == "nt" else "clear")
-        quiz(word_dict, mode)
-    else:
-        print("\n👋 感謝使用")
 
 # === 選擇桌面上的 txt 檔 ===
 def choose_txt_from_desktop():
@@ -116,6 +119,7 @@ def choose_txt_from_desktop():
         else:
             print("❌ 輸入錯誤，請重新輸入！")
 
+
 # === 主程式 ===
 def main():
     os.system("cls" if os.name == "nt" else "clear")
@@ -136,9 +140,10 @@ def main():
     else:
         print("輸入錯誤，請重新執行！")
 
+
 if __name__ == "__main__":
     main()
 
 # 打包成exe
 # cd C:\Users\ymca9\Desktop\code
-# pyinstaller --onefile word.py 
+# pyinstaller --onefile word.py
